@@ -1,24 +1,28 @@
 <template>
-  <div>
-    <Dropdown :sheets="allSheets" v-if="isAuth" />
-    <a v-if="merchantDeals.length" download="deals.json" :href="dealDrl">
+  <div class="deals">
+    <!-- <Dropdown :sheets="allSheets" /> -->
+    <!-- <a v-if="merchantDeals.length" download="deals.json" :href="dealDrl">
       save
-    </a>
+    </a> -->
+    <div class="deals__dev">
+      <Deal v-for="deal in prodDeals" :key="deal.name" :deal="deal" />
+    </div>
+    <div class="deals__prod">
+      <Deal v-for="deal in prodDeals" :key="deal.name" :deal="deal" />
+    </div>
   </div>
 </template>
 
 <script>
-import Dropdown from '../components/dropdown.vue';
+import Deal from '../components/deal.vue';
+// import Dropdown from '../components/dropdown.vue';
 import { urlToSave } from '../utils';
 
 export default {
   components: {
-    Dropdown,
+    Deal,
   },
   computed: {
-    isAuth() {
-      return this.$store.state.isAuthorized;
-    },
     isGapiLoaded() {
       return this.$store.state.isGapiLoaded;
     },
@@ -34,10 +38,22 @@ export default {
     dealDrl() {
       return urlToSave(this.merchantDeals);
     },
+
+    prodDeals() {
+      return this.$store.state.prodDeals;
+    },
   },
 
   created() {
     this.$store.dispatch('getAllSheets');
+    this.$store.dispatch('getProdDeals');
   },
 };
 </script>
+
+<style>
+.deals {
+  display: flex;
+  justify-content: space-around;
+}
+</style>

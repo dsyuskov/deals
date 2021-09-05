@@ -39,3 +39,16 @@ export const getSigninStatus = () => {
 export const signIn = () => {
   return window.gapi.auth2.getAuthInstance().signIn();
 };
+
+export const getProdDeals = async () => {
+  const response = await fetch(
+    'https://drvdjliq91br5.cloudfront.net/merchant-data/extension/deals.json?cacheblock=true'
+  );
+
+  if (response.ok) {
+    const prodDeals = await response.json();
+    return prodDeals;
+  }
+
+  return null;
+};
