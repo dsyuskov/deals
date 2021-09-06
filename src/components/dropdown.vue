@@ -1,25 +1,27 @@
 <template>
-  <select @change="handleClick($event)">
-    <option v-for="sheet in sheets" :value="sheet.title" :key="sheet.sheetId">{{
-      sheet.title
-    }}</option>
+  <select @change="$emit('on-change', $event)" class="dropdown">
+    <option value="false">All merchants</option>
+    <option v-for="merchant in merchants" :value="merchant" :key="merchant">
+      {{ merchant }}
+    </option>
   </select>
 </template>
 
 <script>
 export default {
   props: {
-    sheets: {
+    merchants: {
       type: Array,
       default: () => [],
     },
   },
-
-  methods: {
-    handleClick(event) {
-      const sheetName = event.target.value;
-      this.$store.dispatch('getValuesFromSheet', sheetName);
-    },
-  },
 };
 </script>
+
+<style>
+.dropdown {
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+</style>

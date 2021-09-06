@@ -20,6 +20,7 @@ const store = new Vuex.Store({
     allSheets: [],
     devDeals: [],
     prodDeals: [],
+    merchantsId: [],
   },
 
   mutations: {
@@ -52,10 +53,26 @@ const store = new Vuex.Store({
       return allSheets;
     },
 
-    async getValuesFromSheet(state, sheetName) {
-      const rawData = await getDealsFromSheet(SPRED_SHEETS_ID, sheetName);
-      const devDeals = createDealsFromSheets(rawData);
+    async getDevDeals(state) {
+      const templateSheetId = 951277191;
+      const allSheets = await store.dispatch('getAllSheets');
+      let devDeals = [];
+
+      const filtredSheets = allSheets.filter((deal) => deal.sheetId !== templateSheetId);
+
+      const promises = filtredSheets.map(async (sheet) => {
+        const rawData = await getDealsFromSheet(SPRED_SHEETS_ID, sheet.title);
+        const devDealsMerchant = createDealsFromSheets(rawData);
+        devDeals = [...devDeals, ...devDealsMerchant];
+      });
+
+      await Promise.all(promises);
+
       state.commit('update', { devDeals });
+
+      const merchantsId = new Set();
+      devDeals.forEach((deal) => merchantsId.add(deal.merchantId));
+      state.commit('update', { merchantsId: Array.from(merchantsId) });
 
       return devDeals;
     },

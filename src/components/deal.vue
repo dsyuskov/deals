@@ -1,8 +1,17 @@
 <template>
-  <div class="deal">
-    <span>{{ deal.merchantId }}</span>
+  <div
+    class="deal"
+    :class="{
+      deal_active: isActive,
+    }"
+  >
     <h3 class="deal__title">{{ deal.title }}</h3>
-    <span>{{ deal.price }} {{ deal.oldPrice }}</span>
+    <div class="deal__item">{{ deal.merchantId }}</div>
+    <div class="deal__item">Expire date: {{ deal.expireDate }}</div>
+    <div class="deal__item" v-if="deal.price">
+      {{ deal.price }} {{ deal.oldPrice }}
+    </div>
+    <div class="deal__item" v-else>Discount {{ deal.discount }}</div>
   </div>
 </template>
 
@@ -13,14 +22,22 @@ export default {
       type: Object,
     },
   },
+
+  computed: {
+    isActive() {
+      const { enabled, expireDate } = this.deal;
+      return enabled && new Date(expireDate) > new Date();
+    },
+  },
 };
 </script>
 <style>
 .deal {
-  width: 600px;
-  height: 100px;
+  max-width: 600px;
+  height: 120px;
   border-radius: 4px;
-  border: 1px solid red;
+  padding: 10px;
+  border: 2px solid red;
 }
 
 .deal:not(:last-child) {
@@ -28,6 +45,15 @@ export default {
 }
 
 .deal__title {
+  margin: 5px 0 10px;
   font-size: 16px;
+}
+
+.deal__item {
+  margin-bottom: 5px;
+}
+
+.deal_active {
+  border-color: green;
 }
 </style>

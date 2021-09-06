@@ -7,8 +7,8 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'deals',
-    component: () => import('../view/deals.vue'),
+    name: 'main',
+    component: () => import('../view/main.vue'),
     meta: {
       requireAutorized: true,
     },
@@ -35,7 +35,7 @@ router.beforeEach((to, from, next) => {
   if (!isAuthorized) {
     next(requireAutorized ? { name: 'signin' } : undefined);
   } else {
-    next(requireAnonimus ? { name: 'deals' } : undefined);
+    next(requireAnonimus ? { name: 'main' } : undefined);
   }
 });
 

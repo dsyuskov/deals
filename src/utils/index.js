@@ -50,7 +50,10 @@ export const createDealsFromSheets = (values) => {
   let dealIndex;
 
   values.map((row) => {
+    if (!row.length) return;
+
     const [key, value, example] = row;
+
     if (key.includes('Deal')) {
       dealIndex = result.push({}) - 1;
     }

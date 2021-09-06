@@ -24,7 +24,7 @@ export default {
         const isAuthorized = await this.$store.dispatch('signInAction');
 
         if (isAuthorized) {
-          this.$router.push({ name: 'deals' });
+          this.$router.push({ name: 'main' });
         }
       } catch (error) {
         console.log(`int_21h-error:`, error);
