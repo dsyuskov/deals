@@ -19,7 +19,6 @@ function initClient() {
     .then(
       async function() {
         await store.commit('gapiLoaded');
-        await store.dispatch('getSigninStatus');
       },
       function(error) {
         console.log(error);

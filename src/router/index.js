@@ -9,33 +9,25 @@ const routes = [
     path: '/',
     name: 'main',
     component: () => import('../view/main.vue'),
-    meta: {
-      requireAutorized: true,
-    },
   },
   {
     path: '/signin',
     name: 'signin',
     component: () => import('../view/signin.vue'),
-    meta: {
-      requireAnonimus: true,
-    },
   },
 ];
 
 const router = new VueRouter({
-  mode: 'history',
   routes,
 });
 
 router.beforeEach((to, from, next) => {
-  const { requireAutorized } = to.meta;
-  const { isAuthorized, requireAnonimus } = store.state;
+  const { isAuthorized } = store.state;
 
-  if (!isAuthorized) {
-    next(requireAutorized ? { name: 'signin' } : undefined);
+  if (!isAuthorized && to.name !== 'signin') {
+    next({ name: 'signin' })
   } else {
-    next(requireAnonimus ? { name: 'main' } : undefined);
+    next();
   }
 });
 

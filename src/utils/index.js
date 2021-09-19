@@ -1,8 +1,14 @@
-import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from './constants';
+import {
+  API_KEY,
+  CLIENT_ID,
+  DISCOVERY_DOCS,
+  SCOPES,
+  DEAL_FIELDS,
+  COMPARE_DEAL_FIELDS,
+} from './constants';
 import store from '../store';
 
 export function initClient() {
-  console.log(`int_21h: initClient`);
   window.gapi.client
     .init({
       apiKey: API_KEY,
@@ -37,9 +43,6 @@ const formatValue = (key, value) => {
     return `£${value}`;
   }
 
-  if (key === 'name') {
-    return value.replaceAll('%', '-percent');
-  }
   return value;
 };
 
@@ -56,6 +59,10 @@ export const createDealsFromSheets = (values) => {
 
     if (key.includes('Deal')) {
       dealIndex = result.push({}) - 1;
+    }
+
+    if (!DEAL_FIELDS.includes(key)) {
+      return;
     }
 
     if (isValue(value)) {
@@ -78,4 +85,73 @@ export const createDealsFromSheets = (values) => {
   });
 
   return result;
+};
+
+export const compareDeals = (devDeal, prodDeal) => {
+  let result = true;
+  const array = [];
+
+  COMPARE_DEAL_FIELDS.forEach((key) => {
+    if (key === 'examples' && devDeal[key]) {
+      const devDealExamples = devDeal[key];
+      const prodDealExamples = prodDeal[key];
+      for (let i = 0; i < devDealExamples.length; i++) {
+        const compareExample = compareDeals(
+          devDealExamples[i],
+          prodDealExamples[i]
+        );
+        if (compareExample.length) {
+          result = false;
+          array.push(key);
+        }
+      }
+
+      return result;
+    }
+
+    if (devDeal[key] !== prodDeal[key]) {
+      result = false;
+      array.push(key);
+    }
+  });
+
+  return array;
+};
+
+export const findDeal = (deal, deals) => {
+  const result = deals.find((item) => item.name === deal.name);
+
+  return result;
+};
+
+export const checkDeals = (devDeals, prodDeals) => {
+  const result = [...devDeals];
+  result.forEach((devDeal) => {
+    const matchDeal = findDeal(devDeal, prodDeals);
+
+    if (!matchDeal) {
+      devDeal.add = true;
+    } else {
+      const diff = compareDeals(devDeal, matchDeal);
+
+      devDeal.update = diff;
+    }
+  });
+  return result;
+};
+
+export const sortDevDeals = (devDeals, prodDeals) => {
+  let _devDeals = [...devDeals];
+  const result = [];
+
+  prodDeals.forEach((deal) => {
+    const prodDeal = findDeal(deal, _devDeals);
+
+    if (prodDeal) {
+      result.push(prodDeal);
+      _devDeals = _devDeals.filter((deal) => deal.name !== prodDeal.name);
+    }
+  });
+
+  return [...result, ..._devDeals];
 };

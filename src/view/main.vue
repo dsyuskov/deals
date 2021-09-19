@@ -1,12 +1,16 @@
 <template>
-  <div class="main">
-    <Deals :deals="devDeals" title="Development deals" />
-    <Deals :deals="prodDeals" title="Production deals" />
+  <div>
+    <button @click="handleButtonClick">button</button>
+    <div class="main">
+      <Deals :deals="devDeals" title="Development deals" />
+      <Deals :deals="prodDeals" title="Production deals" :removable="true" />
+    </div>
   </div>
 </template>
 
 <script>
 import Deals from '../components/deals.vue';
+import { sortDevDeals } from '../utils';
 
 export default {
   components: {
@@ -23,6 +27,12 @@ export default {
     },
   },
 
+  methods: {
+    handleButtonClick(){
+      sortDevDeals(this.devDeals, this.prodDeals)
+    }
+  },
+
   created() {
     this.$store.dispatch('getProdDeals');
     this.$store.dispatch('getDevDeals');
@@ -32,7 +42,7 @@ export default {
 
 <style>
 .main {
-  max-width: 1400px;
+  max-width: 1700px;
   margin: 0 auto;
   display: flex;
   justify-content: space-around;

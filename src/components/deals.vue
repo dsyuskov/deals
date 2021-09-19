@@ -26,7 +26,7 @@
         Save json
       </a>
     </div>
-    <Deal v-for="deal in filtredDeals" :key="deal.name" :deal="deal" />
+    <Deal v-for="deal in filtredDeals" :key="deal.name" :deal="deal" :removable="removable" />
   </div>
 </template>
 
@@ -46,6 +46,10 @@ export default {
       type: String,
       default: '',
     },
+    removable: {
+      type: Boolean,
+      default: false,
+    }
   },
 
   components: {
@@ -112,7 +116,6 @@ export default {
 
 <style>
 .deals {
-  width: 600px;
   margin: 0 20px;
 }
 

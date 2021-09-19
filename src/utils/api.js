@@ -1,3 +1,5 @@
+import { DEALS_PATH } from './constants';
+
 export const getAllList = async (spreadsheetId) => {
   const response = await window.gapi.client.sheets.spreadsheets.get({
     spreadsheetId,
@@ -41,9 +43,7 @@ export const signIn = () => {
 };
 
 export const getProdDeals = async () => {
-  const response = await fetch(
-    'https://drvdjliq91br5.cloudfront.net/merchant-data/extension/deals.json?cacheblock=true'
-  );
+  const response = await fetch(DEALS_PATH);
 
   if (response.ok) {
     const prodDeals = await response.json();

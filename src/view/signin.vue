@@ -27,7 +27,7 @@ export default {
           this.$router.push({ name: 'main' });
         }
       } catch (error) {
-        console.log(`int_21h-error:`, error);
+        console.log(error);
       }
     },
   },
@@ -47,3 +47,4 @@ export default {
   height: 50px;
 }
 </style>
+
