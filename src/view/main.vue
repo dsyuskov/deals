@@ -1,7 +1,8 @@
 <template>
-  <div>
-    <button @click="handleButtonClick">button</button>
-    <div class="main">
+
+  <div class="main">
+    <Filters />
+    <div class="main__deals">
       <Deals :deals="devDeals" title="Development deals" />
       <Deals :deals="prodDeals" title="Production deals" :removable="true" />
     </div>
@@ -10,38 +11,62 @@
 
 <script>
 import Deals from '../components/deals.vue';
-import { sortDevDeals } from '../utils';
+import Filters from '../components/filters.vue';
 
 export default {
   components: {
     Deals,
+    Filters,
   },
 
   computed: {
     prodDeals() {
-      return this.$store.state.prodDeals;
+      const { filters } = this.$store.state;
+
+      return this.filtredDeals(this.$store.state.prodDeals, filters);
     },
 
     devDeals() {
-      return this.$store.state.devDeals;
+      const { filters } = this.$store.state;
+      return this.filtredDeals(this.$store.state.devDeals, filters);
     },
-  },
-
-  methods: {
-    handleButtonClick(){
-      sortDevDeals(this.devDeals, this.prodDeals)
-    }
   },
 
   created() {
     this.$store.dispatch('getProdDeals');
     this.$store.dispatch('getDevDeals');
   },
+
+  methods: {
+    filtredDeals(deals, filters) {
+      const { enabled, expireDate, merchantId } = filters;
+
+      let filtredDeals = [...deals];
+
+      if (enabled) {
+        filtredDeals = filtredDeals.filter((deal) => deal.enabled);
+      }
+
+      if (expireDate) {
+        filtredDeals = filtredDeals.filter(
+          (deal) => new Date(deal.expireDate) > new Date()
+        );
+      }
+
+      if (merchantId) {
+        filtredDeals = filtredDeals.filter(
+          (deal) => deal.merchantId === merchantId
+        );
+      }
+
+      return filtredDeals;
+    },
+  }
 };
 </script>
 
 <style>
-.main {
+.main__deals {
   max-width: 1700px;
   margin: 0 auto;
   display: flex;

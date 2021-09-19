@@ -1,22 +1,7 @@
 <template>
   <div class="deals">
-    <h3>{{ title }} {{ filtredDeals.length }}</h3>
+    <h3>{{ title }} {{ deals.length }}</h3>
     <div class="deal__header">
-      <div class="deals__filter">
-        <label>
-          Expired
-          <input type="checkbox" v-model="filterExpireDate" />
-        </label>
-        <label>
-          Enabled
-          <input type="checkbox" v-model="filterEnabled" />
-        </label>
-        <Dropdown
-          class="deal__dropdown"
-          :merchants="merchantsId"
-          @on-change="handleDropdownChange($event)"
-        />
-      </div>
       <a
         class="deal__save-button"
         v-if="deals.length"
@@ -26,13 +11,12 @@
         Save json
       </a>
     </div>
-    <Deal v-for="deal in filtredDeals" :key="deal.name" :deal="deal" :removable="removable" />
+    <Deal v-for="deal in deals" :key="deal.name" :deal="deal" :removable="removable" />
   </div>
 </template>
 
 <script>
 import Deal from './deal.vue';
-import Dropdown from './dropdown.vue';
 
 import { urlToSave } from '../utils';
 
@@ -54,59 +38,15 @@ export default {
 
   components: {
     Deal,
-    Dropdown,
-  },
-
-  data() {
-    return {
-      filterEnabled: false,
-      filterExpireDate: false,
-      filterMerchant: false,
-    };
   },
 
   computed: {
     urlSave() {
-      return urlToSave(this.filtredDeals);
-    },
-
-    merchantsId() {
-      return this.$store.state.merchantsId;
-    },
-
-    filtredDeals() {
-      let filtredDeals = this.deals;
-
-      if (this.filterEnabled) {
-        filtredDeals = filtredDeals.filter((deal) => deal.enabled);
-      }
-
-      if (this.filterExpireDate) {
-        filtredDeals = filtredDeals.filter(
-          (deal) => new Date(deal.expireDate) > new Date()
-        );
-      }
-
-      if (this.filterMerchant) {
-        filtredDeals = filtredDeals.filter(
-          (deal) => deal.merchantId === this.filterMerchant
-        );
-      }
-
-      return filtredDeals;
+      return urlToSave(this.deals);
     },
   },
 
   methods: {
-    handleDropdownChange(event) {
-      const merchantId = event.target.value;
-      if (merchantId === 'false') {
-        this.filterMerchant = false;
-      } else {
-        this.filterMerchant = merchantId;
-      }
-    },
-
     handleSaveButton() {
       urlToSave;
     },

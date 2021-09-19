@@ -43,6 +43,10 @@ const formatValue = (key, value) => {
     return `£${value}`;
   }
 
+  if (key === 'discount') {
+    return Number.parseFloat(value);
+  }
+
   return value;
 };
 

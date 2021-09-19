@@ -20,7 +20,6 @@ export const CDN_ROOT =
 export const DEALS_PATH = 'https://drvdjliq91br5.cloudfront.net/merchant-data/extension/deals.json?cacheblock=true';
 
 export const DEAL_FIELDS = [
-  'type',
   'name',
   'merchantId',
   'expireDate',
@@ -34,7 +33,6 @@ export const DEAL_FIELDS = [
 ];
 
 export const COMPARE_DEAL_FIELDS = [
-  'type',
   'expireDate',
   'title',
   'link',

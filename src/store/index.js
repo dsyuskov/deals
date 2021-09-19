@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import filters from './filters';
 
 import {
   getAllList,
@@ -19,6 +20,9 @@ import {
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
+  modules: {
+    filters,
+  },
   state: {
     isGapiLoaded: false,
     isAuthorized: false,
