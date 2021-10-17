@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import filters from './filters';
+import { compareDeal } from '../utils';
 
 import {
   getAllList,
@@ -12,9 +13,8 @@ import {
 import { SPRED_SHEETS_ID } from '../utils/constants';
 import {
   createDealsFromSheets,
-  checkDeals,
-  findDeal,
-  sortDevDeals,
+  createDealFromJSON,
+  compareDeals,
 } from '../utils';
 
 Vue.use(Vuex);
@@ -30,6 +30,7 @@ const store = new Vuex.Store({
     devDeals: [],
     prodDeals: [],
     merchantsId: [],
+    allDeals: []
   },
 
   mutations: {
@@ -40,35 +41,35 @@ const store = new Vuex.Store({
       state.isGapiLoaded = true;
     },
     addDeal(state, deal) {
-      const mathProdDeal = findDeal(deal, this.state.prodDeals);
-      if (!mathProdDeal) {
-        deal.add = false;
-        delete deal.add;
-        state.prodDeals.unshift(deal);
-      }
+      const index = state.allDeals.findIndex((pairDeals) => deal.name === pairDeals[0].name);
+      const [devDeal] = state.allDeals[index];
+
+      delete devDeal.isAdd;
+
+      const newPairDeals = JSON.parse(JSON.stringify([devDeal, devDeal]))
+
+      Vue.set(state.allDeals, index, newPairDeals);
     },
     removeDeal(state, deal) {
-      const result = this.state.prodDeals.filter(
-        (item) => item.name != deal.name
-      );
-      this.state.prodDeals = [...result];
+      const index = state.allDeals.findIndex((pairDeals) => deal.name === pairDeals[0].name);
+
+      const [devDeal] = state.allDeals[index];
+
+      const [newDevDeal] = JSON.parse(JSON.stringify([devDeal, devDeal]))
+      compareDeal(newDevDeal, newDevDeal);
+      newDevDeal.isAdd = true;
+
+      Vue.set(state.allDeals, index, [newDevDeal, {}]);
     },
     updateDeal(state, deal) {
-      const mathProdDeal = findDeal(deal, this.state.prodDeals);
+      const index = state.allDeals.findIndex((pairDeals) => deal.name === pairDeals[0].name);
+      const [devDeal] = state.allDeals[index];
 
-      if (mathProdDeal) {
-        deal.update = false;
-        delete deal.add;
+      const [newDevDeal, newProdDeal] = JSON.parse(JSON.stringify([devDeal, devDeal]))
+      const newPairDeals = compareDeal(newDevDeal, newProdDeal);
 
-        Object.entries(deal).forEach(([key, value]) => {
-          if (Array.isArray(mathProdDeal[key])) {
-            mathProdDeal[key] = [...value];
-          } else {
-            mathProdDeal[key] = value;
-          }
-        });
-      }
-    },
+      Vue.set(state.allDeals, index, newPairDeals);
+    }
   },
   actions: {
     async signInAction(state) {
@@ -105,23 +106,34 @@ const store = new Vuex.Store({
 
       await Promise.all(promises);
 
-      devDeals = sortDevDeals(devDeals, this.state.prodDeals);
-      const checkedDevDeals = checkDeals(devDeals, this.state.prodDeals);
-      state.commit('update', { devDeals: checkedDevDeals });
+      state.commit('update', { devDeals });
 
       const merchantsId = new Set();
-      checkedDevDeals.forEach((deal) => merchantsId.add(deal.merchantId));
+      devDeals.forEach((deal) => merchantsId.add(deal.merchantId));
+
       state.commit('update', { merchantsId: Array.from(merchantsId) });
 
       return devDeals;
     },
 
     async getProdDeals(state) {
-      const prodDeals = await getProdDeals();
+      const rawData = await getProdDeals();
+      const prodDeals = createDealFromJSON(rawData)
+
       state.commit('update', { prodDeals });
 
       return prodDeals;
     },
+
+    async getAllDeals(state) {
+      const prodDeals = await state.dispatch('getProdDeals');
+      const devDeals = await state.dispatch('getDevDeals');
+
+      const allDeals = compareDeals(devDeals, prodDeals);
+      state.commit('update', { allDeals });
+
+      return allDeals;
+    }
   },
 });
 

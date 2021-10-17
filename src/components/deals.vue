@@ -1,9 +1,9 @@
 <template>
   <div class="deals">
     <h3>{{ title }} {{ deals.length }}</h3>
-    <div class="deal__header">
+    <div class="deals__header">
       <a
-        class="deal__save-button"
+        class="deals__save-button"
         v-if="deals.length"
         :href="urlSave"
         download="deals.json"
@@ -11,13 +11,15 @@
         Save json
       </a>
     </div>
-    <Deal v-for="deal in deals" :key="deal.name" :deal="deal" :removable="removable" />
+    <div class="deals__row" v-for="pairDeals in deals" :key="pairDeals[0].name">
+      <Deal class="deals__deal" :deal="pairDeals[0]" />
+      <Deal class="deals__deal" :deal="pairDeals[1]" :removable="true"/>
+    </div>
   </div>
 </template>
 
 <script>
 import Deal from './deal.vue';
-
 import { urlToSave } from '../utils';
 
 export default {
@@ -30,10 +32,6 @@ export default {
       type: String,
       default: '',
     },
-    removable: {
-      type: Boolean,
-      default: false,
-    }
   },
 
   components: {
@@ -45,31 +43,32 @@ export default {
       return urlToSave(this.deals);
     },
   },
-
-  methods: {
-    handleSaveButton() {
-      urlToSave;
-    },
-  },
 };
 </script>
 
 <style>
 .deals {
-  margin: 0 20px;
+  max-width: 1700px;
+  margin: 0 auto;
 }
 
-.deal__header {
+.deals__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
-.deal__dropdown {
+.deals__dropdown {
   margin-left: 10px;
 }
 
-.deal__save-button {
+.deals__row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.deals__deal {
+  flex-grow: 1;
 }
 </style>

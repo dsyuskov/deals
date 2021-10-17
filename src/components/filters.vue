@@ -14,20 +14,20 @@
         v-model="filterEnabled"
       />
     </label>
-    <Dropdown
+    <!-- <Dropdown
       class="deal__dropdown"
       :merchants="merchantsId"
       @on-change="handleDropdownChange($event)"
-    />
+    /> -->
   </div>
 </template>
 
 <script>
-import Dropdown from './dropdown.vue';
+// import Dropdown from './dropdown.vue';
 
 export default {
   components: {
-    Dropdown,
+    // Dropdown,
   },
 
   computed: {
