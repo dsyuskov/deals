@@ -21,9 +21,9 @@
       >
     </div>
     <ul class="deals__items">
-      <template v-for="(value, field) in deal">
+      <template v-for="field in $options.DEAL_FIELDS">
         <li
-          v-if="deal[field].value"
+          v-if="deal[field]"
           class="deal__item"
           :class="{
             'deal__item_changed': deal[field].isChange
@@ -49,7 +49,7 @@
             v-for="example in deal.examples"
             :key="example.name"
           >
-            {{ example.link.value }}
+            <a :href="example.link.value" target="blank">{{ example.link.value }}</a>
           </td>
         </tr>
         <tr>
@@ -57,11 +57,11 @@
           <td
             v-for="example in deal.examples"
             :key="example.name"
-            :class="{
-              'deal__examples_changed': example.price.isChange
-            }"
+
           >
-            {{ example.price.value }}
+            <template v-if="example.price">
+              {{ example.price.value }}
+            </template>
           </td>
         </tr>
         <tr>
@@ -69,11 +69,11 @@
           <td
             v-for="example in deal.examples"
             :key="example.name"
-            :class="{
-              'deal__examples_changed': example.oldPrice.isChange
-            }"
+
           >
-            {{ example.oldPrice.value }}
+            <template v-if="example.oldPrice">
+              {{ example.oldPrice.value }}
+            </template>
           </td>
         </tr>
       </table>
@@ -106,11 +106,12 @@
 </template>
 
 <script>
-import { CDN_ROOT } from '../utils/constants';
+import { CDN_ROOT, DEAL_FIELDS } from '../utils/constants';
 import  { isChangedDeal } from '../utils';
 
 export default {
   CDN_ROOT,
+  DEAL_FIELDS,
 
   props: {
     deal: {

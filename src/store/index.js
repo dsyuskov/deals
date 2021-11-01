@@ -100,7 +100,8 @@ const store = new Vuex.Store({
 
       const promises = filtredSheets.map(async (sheet) => {
         const rawData = await getDealsFromSheet(SPRED_SHEETS_ID, sheet.title);
-        const devDealsMerchant = createDealsFromSheets(rawData);
+        const devDealsMerchant = await createDealsFromSheets(rawData);
+
         devDeals = [...devDeals, ...devDealsMerchant];
       });
 

@@ -6,6 +6,7 @@ import {
   DEAL_FIELDS,
 } from './constants';
 import store from '../store';
+import { getPrice } from './api';
 
 export function initClient() {
   window.gapi.client
@@ -55,30 +56,67 @@ const formatValue = (key, value) => {
   return _value;
 };
 
-const examplesDeals = (row, examples) => {
-  const [key, , ...rest] = row;
+export const examplesDeals = async(row, examples, discount) => {
+  const [key, value, ...rest] = row;
 
-  rest.forEach((exampleDeal, index) => {
-    if (!isValue(exampleDeal)) {
-      return;
-    }
+  const deals = [...rest]
+
+  if ( !key.includes('selector') && !isValue(deals[0]) ) return examples;
+
+  for (let i = 0; i < 6; i++) {
+    const index = i;
+    const exampleValue = deals[i];
+
 
     if (key === 'name') {
       examples[index] = {
-        name: formatValue(key, exampleDeal),
+        name: formatValue(key, exampleValue),
       }
 
-      return;
+      continue;
     }
 
-    examples[index] = {
-      ...examples[index],
-      [key]: {
-        value: formatValue(key, exampleDeal),
-        isChange: false,
-      },
+    if (key.toLowerCase().includes('price')) {
+      continue;
     }
-  });
+
+    if (key.includes('selector') && examples[index]) {
+      const dealUrl = await getUrlToParse(examples[index].link.value);
+      const price = await getPrice({ url: dealUrl, selector: value });
+      console.log(`int_21h-price:`, price);
+      if (price) {
+        examples[index] = {
+          ...examples[index],
+          oldPrice: {
+            value: formatValue('price', price.toFixed(2)),
+            isChange: false,
+          },
+        }
+
+        const discount1 = parseFloat(discount.value);
+
+        const newPrice = (price - (price * discount1 / 100)).toFixed(2);
+
+        examples[index] = {
+          ...examples[index],
+          price: {
+            value: formatValue('price', newPrice),
+            isChange: false,
+          },
+        }
+      }
+    }
+
+    if (!key.includes('selector')) {
+      examples[index] = {
+        ...examples[index],
+        [key]: {
+          value: formatValue(key, exampleValue),
+          isChange: false,
+        },
+      }
+    }
+  }
 
   return examples;
 }
@@ -109,15 +147,15 @@ export const createDealFromJSON = (rawData) => {
   return result;
 }
 
-export const createDealsFromSheets = (rawData) => {
+export const createDealsFromSheets = async (rawData) => {
   const result = [];
   const isChange = false;
 
   let deal;
 
-  rawData.forEach((row) => {
+  for (const row of rawData) {
     if (!row.length) {
-      return;
+      continue;
     }
 
     const [key, value] = row;
@@ -128,33 +166,56 @@ export const createDealsFromSheets = (rawData) => {
       }
 
       deal = { examples: []};
-      return;
+      continue;
     }
 
-    deal.examples = examplesDeals(row, deal.examples)
+    deal.examples = await examplesDeals(row, deal.examples, deal.discount)
 
     if (key.includes('name')) {
       deal.name = formatValue(key, value);
-      return;
+      continue;
     }
 
-    if (!DEAL_FIELDS.includes(key)) {
-      return;
-    }
+    // if (!DEAL_FIELDS.includes(key)) {
+    //   continue;
+    // }
 
     if (!isValue(value)) {
-      return;
+      continue;
+    }
+
+    if (key.toLowerCase().includes('price')) {
+      continue;
+    }
+
+    if (key.includes('selector')) {
+      const dealUrl = await getUrlToParse(deal.link.value);
+      const price = await getPrice({ url: dealUrl, selector: value });
+      console.log(`int_21h-price:`, price);
+      if (price) {
+        deal.oldPrice = {
+          value: formatValue('price', price.toFixed(2)),
+          isChange,
+        }
+
+        const discount = parseFloat(deal.discount.value);
+        const newPrice = (price - (price * discount / 100)).toFixed(2);
+
+        deal.price = {
+          value: formatValue('price', newPrice),
+          isChange,
+        }
+      }
     }
 
     deal[key] = {
       value: formatValue(key, value),
       isChange,
     };
-
-  });
+  }
 
   result.push(deal)
-
+  console.log(`int_21h-result:`, result);
   return result;
 }
 
@@ -269,3 +330,15 @@ export const isChangedDeal = (deal) => {
   return false;
 }
 
+
+export const getUrlToParse = (url) => {
+  const params = {};
+  const hashes = url.slice(url.indexOf('?')+1).split('&');
+
+  hashes.map((hash) => {
+    const [key, value] = hash.split('=');
+    params[key] = value;
+  });
+
+  return decodeURIComponent(params?.ued);
+}

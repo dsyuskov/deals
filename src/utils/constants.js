@@ -30,5 +30,4 @@ export const DEAL_FIELDS = [
   'discount',
   'description',
   'enabled',
-  'examples',
 ];

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { DEALS_PATH } from './constants';
 
 export const getAllList = async (spreadsheetId) => {
@@ -43,12 +44,21 @@ export const signIn = () => {
 };
 
 export const getProdDeals = async () => {
-  const response = await fetch(DEALS_PATH);
-
-  if (response.ok) {
-    const prodDeals = await response.json();
-    return prodDeals;
+  try {
+    const { data } = await axios.get(DEALS_PATH);
+    return data;
+  } catch (error) {
+    return null;
   }
-
-  return null;
 };
+
+export const getPrice = async (payload) => {
+  try {
+    const { data } = await axios.post('http://127.0.0.1:3000/api/parse', payload);
+    return data;
+  } catch (error) {
+    console.error(error);
+
+    return null;
+  }
+}
